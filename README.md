@@ -1,4 +1,4 @@
-# LineGame Puzzle v0.01
+# LineGame Puzzle Version 1.0.1
 
 ![Demo of the game.](media/game_demo.gif "Game Demo")
 
@@ -35,10 +35,14 @@ Check out [my website](https://www.joshuaibrom.com),
 
 ## Changelog
 ---
-**Version 0.01**
+**Version 1.0.0**
 
 * Created the game.
 * Included default map and associated code.
+
+**Version 1.0.1**
+
+* Fixed versioning format
 
 ## ToDo
 ---
