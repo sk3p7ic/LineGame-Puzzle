@@ -1,4 +1,4 @@
-# LineGame Puzzle Version 1.0.1
+# LineGame Puzzle Version 1.1.0
 
 ![Demo of the game.](media/game_demo.gif "Game Demo")
 
