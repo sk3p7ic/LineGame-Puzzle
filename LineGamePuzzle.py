@@ -28,8 +28,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-from os import system as sys_cmd # Used to run "cls" command
-import msvcrt, sys, time # Used to get keypresses, exit, and wait
+from sys import platform as sys_platform
+from os import system as sys_cmd # Used to run clear console
+import sys, time # Used to exit and wait
 
 class Game:
   '''Runs the game.'''
@@ -42,8 +43,10 @@ class Game:
   MAP_BOUNDRS = [['█', '█'], ['█', '█']] # The spaces taken by the map
   UNUSED_SPCE = [[' ', ' '], [' ', ' ']] # Empty space
   PLAYERSPEED = 0.000 # The speed at which the player will move, in seconds
+  SYS_PLATFORM = None
+  STDSCR = None
 
-  def __init__(self, infile, start_position=(0,0)):
+  def __init__(self, infile, platform, stdscr=None, start_position=(0,0)):
     '''Creates the map based off of input file and sets up game.'''
     # Import file map
     temp_map = [[char for char in line if char != '\n'] for line in infile]
@@ -58,25 +61,44 @@ class Game:
     # Set other variables
     self.CURR_POS = start_position
     self.GAME_MAP[self.CURR_POS[0]][self.CURR_POS[1]] = self.PLAYER_CHAR
+    if "win" in platform: self.SYS_PLATFORM = "win"
+    else: self.SYS_PLATFORM = platform
+    if self.SYS_PLATFORM != "win": self.STDSCR = stdscr # Get stdscr for *nix
 
   def printMap(self):
     '''Prints the game map.'''
-    def printer(args):
-      '''Prints an array of args by printing top of arg, then bottom.'''
-      # Iterate through top characters
-      for arg in args:
-        for char in arg[0]: # Selects top chars
-          print(char * 2, end='') # Add more of char to prevent vert stretch
-      print() # Newline
-      # Iterate through bottom characters
-      for arg in args:
-        for char in arg[1]: # Selects bottom chars
-          print(char * 2, end='')
-      print()# Newline
-    sys_cmd("cls") # Clears the screen
+    if self.SYS_PLATFORM == "win":
+      def printer(args):
+        '''Prints an array of args by pprinting top of arg, then bottom.'''
+        # Iterate through top characters
+        for arg in args:
+          for char in arg[0]: # Selects top chars
+            print(char * 2, end='') # Add more of char to prevent vert stretch
+        print() # Newline
+        # Iterate through bottom characters
+        for arg in args:
+          for char in arg[1]: # Selects bottom chars
+            print(char * 2, end='')
+        print()# Newline
+    else:
+      def printer(args):
+        for arg in args:
+          for char in arg[0]:
+            self.STDSCR.addstr(char * 2)
+        self.STDSCR.addstr('\n')
+        for arg in args:
+          for char in arg[1]:
+            self.STDSCR.addstr(char * 2)
+        self.STDSCR.addstr('\n')
+        self.STDSCR.refresh()
+    if self.SYS_PLATFORM == "win": sys_cmd("cls") # Clears the screen
     for line in self.GAME_MAP: printer(line) # Call the printer
-    print("\n[*] Moves: {moves}".format(moves=self.MOVE_NUM))
-    
+    if self.SYS_PLATFORM == "win":
+      print("\n[*] Moves: {moves}".format(moves=self.MOVE_NUM))
+    else:
+      self.STDSCR.addstr("\n[*] Moves: {moves}".format(moves=self.MOVE_NUM))
+      self.STDSCR.move(0, 0)
+
   def checkWin(self):
     '''Checks if there are any spaces remaining.'''
     return self.SPCS_REM == 0 # Return True if no spaces left
@@ -142,18 +164,47 @@ class Game:
     self.PLAYERSPEED = playerspeed
     self.printMap()
     while self.checkWin() == False: # Loop through game while no winner
-      if msvcrt.kbhit():
-        key = ord(msvcrt.getch())
-        if key == 119: game.movePlayer('u') # W
-        if key == 97: game.movePlayer('l')  # A
-        if key == 115: game.movePlayer('d') # S
-        if key == 100: game.movePlayer('r') # D
-        if key == 113 or key == 27: break
+      if self.SYS_PLATFORM == "win":
+        if msvcrt.kbhit():
+          key = ord(msvcrt.getch())
+          if key == 119: game.movePlayer('u') # W
+          if key == 97: game.movePlayer('l')  # A
+          if key == 115: game.movePlayer('d') # S
+          if key == 100: game.movePlayer('r') # D
+          if key == 113 or key == 27: break
+      else:
+        key = self.STDSCR.getch()
+        if key != -1: # If a key was pressed
+          if key == 119: self.movePlayer('u') # W
+          if key == 97: self.movePlayer('l')  # A
+          if key == 115: self.movePlayer('d') # S
+          if key == 100: self.movePlayer('r') # D
+          if key == 113 or key == 27: break
     if self.checkWin(): print("\n\nWINNER!")
+    if self.SYS_PLATFORM != "win": # Allow player to see score
+      print("Press <ESC> or <q> to quit...")
+      while True:
+        key = self.STDSCR.getch()
+        if key != -1 and key == 113 or key == 27: break
 
+if "win" in sys_platform:
+  def start():
+    infile = open("demo_map.txt", 'r') # File containing the map to be used
+    game = Game(infile, sys_platform, (8, 8)) # Initialize game's components
+    game.gameloop()
+else:
+  def start(stdscr):
+    stdscr.nodelay(1) # Don't wait to call getch
+    infile = open("demo_map.txt", 'r') # File containing the map to be used
+    game = Game(infile, sys_platform, stdscr, (8, 8))
+    game.gameloop()
 
 if __name__ == "__main__":
-  '''Code ran on startup.'''
-  infile = open("demo_map.txt", 'r') # File containing the map to be used
-  game = Game(infile, (8, 8)) # Initilize game's components
-  game.gameloop() # Start the game
+  '''Code ran on startup. Starts game depending on host platform'''
+  # Run start method depending on platform
+  if "win" in sys_platform: # Windows
+    import mscvrt # Used for getting keypresses in Windows
+    start() # Start the game
+  else: # *nix
+    import curses # Used for getting keypresses
+    curses.wrapper(start) # Starts the game in a wrapped session
