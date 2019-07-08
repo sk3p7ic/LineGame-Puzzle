@@ -44,9 +44,13 @@ Check out [my website](https://www.joshuaibrom.com),
 
 * Fixed versioning format
 
+**Version 1.1.0**
+
+* Added Linux Support.
+
 ## ToDo
 ---
-- [ ] Add Linux support
+- [X] Add Linux support
 - [ ] Add support for larger maps
 - [ ] Add menu to select different maps
 - [ ] Add scoreboard

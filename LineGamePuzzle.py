@@ -28,12 +28,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-from sys import platform as sys_platform
+from sys import platform as sys_platform # Stores the platform running the game
 from os import system as sys_cmd # Used to run clear console
 import sys, time # Used to exit and wait
 
 class Game:
   '''Runs the game.'''
+  # Main Game Variables
   GAME_MAP = [['#' for x in range(0, 12)] for x in range(0, 12)] # Map of game
   CURR_POS = (0, 0) # Position of the player stored as (y, x)
   MOVE_NUM = 0 # Stores the number of moves a player has made
@@ -43,8 +44,8 @@ class Game:
   MAP_BOUNDRS = [['█', '█'], ['█', '█']] # The spaces taken by the map
   UNUSED_SPCE = [[' ', ' '], [' ', ' ']] # Empty space
   PLAYERSPEED = 0.000 # The speed at which the player will move, in seconds
-  SYS_PLATFORM = None
-  STDSCR = None
+  SYS_PLATFORM = None # Stores the platform the game is running on
+  STDSCR = None # Stores the stdscr variable for curses, if being used
 
   def __init__(self, infile, platform, stdscr=None, start_position=(0,0)):
     '''Creates the map based off of input file and sets up game.'''
@@ -66,7 +67,7 @@ class Game:
     if self.SYS_PLATFORM != "win": self.STDSCR = stdscr # Get stdscr for *nix
 
   def printMap(self):
-    '''Prints the game map.'''
+    '''Prints the game map. Windows version.'''
     if self.SYS_PLATFORM == "win":
       def printer(args):
         '''Prints an array of args by pprinting top of arg, then bottom.'''
@@ -82,20 +83,23 @@ class Game:
         print()# Newline
     else:
       def printer(args):
+        '''Prints the game map. *nix version.'''
+        # Iterate through to characters
         for arg in args:
-          for char in arg[0]:
-            self.STDSCR.addstr(char * 2)
-        self.STDSCR.addstr('\n')
+          for char in arg[0]: # Selects top characters
+            self.STDSCR.addstr(char * 2) # Adds 2 of char to stdscr
+        self.STDSCR.addstr('\n') # Newline
+        # Iterate through bottom characters
         for arg in args:
-          for char in arg[1]:
+          for char in arg[1]: # Selects bottom characters
             self.STDSCR.addstr(char * 2)
-        self.STDSCR.addstr('\n')
+        self.STDSCR.addstr('\n') # Newline
         self.STDSCR.refresh()
     if self.SYS_PLATFORM == "win": sys_cmd("cls") # Clears the screen
     for line in self.GAME_MAP: printer(line) # Call the printer
-    if self.SYS_PLATFORM == "win":
+    if self.SYS_PLATFORM == "win": # Print number of moves if on Windows
       print("\n[*] Moves: {moves}".format(moves=self.MOVE_NUM))
-    else:
+    else: # Add number of moves if using curses and reset to origin
       self.STDSCR.addstr("\n[*] Moves: {moves}".format(moves=self.MOVE_NUM))
       self.STDSCR.move(0, 0)
 
@@ -165,23 +169,23 @@ class Game:
     self.printMap()
     while self.checkWin() == False: # Loop through game while no winner
       if self.SYS_PLATFORM == "win":
-        if msvcrt.kbhit():
-          key = ord(msvcrt.getch())
+        if msvcrt.kbhit(): # If key is pressed
+          key = ord(msvcrt.getch()) # Get the key
           if key == 119: game.movePlayer('u') # W
           if key == 97: game.movePlayer('l')  # A
           if key == 115: game.movePlayer('d') # S
           if key == 100: game.movePlayer('r') # D
           if key == 113 or key == 27: break
       else:
-        key = self.STDSCR.getch()
+        key = self.STDSCR.getch() # Call getch and get -1 if no key pressed
         if key != -1: # If a key was pressed
           if key == 119: self.movePlayer('u') # W
           if key == 97: self.movePlayer('l')  # A
           if key == 115: self.movePlayer('d') # S
           if key == 100: self.movePlayer('r') # D
           if key == 113 or key == 27: break
-    if self.checkWin(): print("\n\nWINNER!")
-    if self.SYS_PLATFORM != "win": # Allow player to see score
+    if self.checkWin(): print("\n\nWINNER!") # Display that player has won
+    if self.SYS_PLATFORM != "win": # Allow player to see score if on *nix
       print("Press <ESC> or <q> to quit...")
       while True:
         key = self.STDSCR.getch()
@@ -189,18 +193,19 @@ class Game:
 
 if "win" in sys_platform:
   def start():
+    '''Starts the game. Windows version.'''
     infile = open("demo_map.txt", 'r') # File containing the map to be used
     game = Game(infile, sys_platform, (8, 8)) # Initialize game's components
     game.gameloop()
 else:
   def start(stdscr):
+    '''Starts the game. *nix version.'''
     stdscr.nodelay(1) # Don't wait to call getch
     infile = open("demo_map.txt", 'r') # File containing the map to be used
     game = Game(infile, sys_platform, stdscr, (8, 8))
     game.gameloop()
 
 if __name__ == "__main__":
-  '''Code ran on startup. Starts game depending on host platform'''
   # Run start method depending on platform
   if "win" in sys_platform: # Windows
     import mscvrt # Used for getting keypresses in Windows
