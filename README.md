@@ -47,6 +47,7 @@ Check out [my website](https://www.joshuaibrom.com),
 **Version 1.1.0**
 
 * Added Linux Support.
+* Added colors to Linux.
 
 ## ToDo
 ---

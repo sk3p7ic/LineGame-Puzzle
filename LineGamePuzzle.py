@@ -66,6 +66,13 @@ class Game:
     else: self.SYS_PLATFORM = platform
     if self.SYS_PLATFORM != "win": self.STDSCR = stdscr # Get stdscr for *nix
 
+  def colorize(self):
+    '''Adds color to the game. Linux only.'''
+    if self.SYS_PLATFORM != "win":
+      curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK) # Boundary
+      curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)  # Used
+      curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_BLACK)  # Player
+
   def printMap(self):
     '''Prints the game map. Windows version.'''
     if self.SYS_PLATFORM == "win":
@@ -87,12 +94,26 @@ class Game:
         # Iterate through to characters
         for arg in args:
           for char in arg[0]: # Selects top characters
-            self.STDSCR.addstr(char * 2) # Adds 2 of char to stdscr
+            if char == self.PLAYER_CHAR[0][0]:
+              self.STDSCR.addstr(char * 2, curses.color_pair(3))
+            if char == self.USED_SPACES[0][0]:
+              self.STDSCR.addstr(char * 2, curses.color_pair(2))
+            if char == self.MAP_BOUNDRS[0][0]:
+              self.STDSCR.addstr(char * 2, curses.color_pair(1))
+            if char == self.UNUSED_SPCE[0][0]:
+              self.STDSCR.addstr(char * 2)
         self.STDSCR.addstr('\n') # Newline
         # Iterate through bottom characters
         for arg in args:
           for char in arg[1]: # Selects bottom characters
-            self.STDSCR.addstr(char * 2)
+            if char == self.PLAYER_CHAR[0][0]:
+              self.STDSCR.addstr(char * 2, curses.color_pair(3))
+            if char == self.USED_SPACES[0][0]:
+              self.STDSCR.addstr(char * 2, curses.color_pair(2))
+            if char == self.MAP_BOUNDRS[0][0]:
+              self.STDSCR.addstr(char * 2, curses.color_pair(1))
+            if char == self.UNUSED_SPCE[0][0]:
+              self.STDSCR.addstr(char * 2)
         self.STDSCR.addstr('\n') # Newline
         self.STDSCR.refresh()
     if self.SYS_PLATFORM == "win": sys_cmd("cls") # Clears the screen
@@ -201,8 +222,11 @@ else:
   def start(stdscr):
     '''Starts the game. *nix version.'''
     stdscr.nodelay(1) # Don't wait to call getch
+    curses.start_color() # Start the colors
+    curses.use_default_colors()
     infile = open("demo_map.txt", 'r') # File containing the map to be used
     game = Game(infile, sys_platform, stdscr, (8, 8))
+    game.colorize()
     game.gameloop()
 
 if __name__ == "__main__":
