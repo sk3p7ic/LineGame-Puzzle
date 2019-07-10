@@ -35,10 +35,10 @@ import sys, time # Used to exit and wait
 class Game:
   '''Runs the game.'''
   # Main Game Variables
-  GAME_MAP = [['#' for x in range(0, 12)] for x in range(0, 12)] # Map of game
-  CURR_POS = (0, 0) # Position of the player stored as (y, x)
-  MOVE_NUM = 0 # Stores the number of moves a player has made
-  SPCS_REM = 0 # The number of spaces remaining
+  game_map = [['#' for x in range(0, 12)] for x in range(0, 12)] # Map of game
+  curr_pos = (0, 0) # Position of the player stored as (y, x)
+  move_num = 0 # Stores the number of moves a player has made
+  spcs_rem = 0 # The number of spaces remaining
   PLAYER_CHAR = [['▒', '▒'], ['▒', '▒']] # The current character position
   USED_SPACES = [['▓', '▓'], ['▓', '▓']] # Spaces used by the player in past
   MAP_BOUNDRS = [['█', '█'], ['█', '█']] # The spaces taken by the map
@@ -55,13 +55,13 @@ class Game:
     for n, line in enumerate(temp_map):
       for m, char in enumerate(line):
         if char == '#':
-          self.GAME_MAP[n][m] = self.MAP_BOUNDRS
+          self.game_map[n][m] = self.MAP_BOUNDRS
         else:
-          self.GAME_MAP[n][m] = self.UNUSED_SPCE
-          self.SPCS_REM += 1
+          self.game_map[n][m] = self.UNUSED_SPCE
+          self.spcs_rem += 1
     # Set other variables
-    self.CURR_POS = start_position
-    self.GAME_MAP[self.CURR_POS[0]][self.CURR_POS[1]] = self.PLAYER_CHAR
+    self.curr_pos = start_position
+    self.game_map[self.curr_pos[0]][self.curr_pos[1]] = self.PLAYER_CHAR
     if "win" in platform: self.SYS_PLATFORM = "win"
     else: self.SYS_PLATFORM = platform
     if self.SYS_PLATFORM != "win": self.STDSCR = stdscr # Get stdscr for *nix
@@ -117,29 +117,29 @@ class Game:
         self.STDSCR.addstr('\n') # Newline
         self.STDSCR.refresh()
     if self.SYS_PLATFORM == "win": sys_cmd("cls") # Clears the screen
-    for line in self.GAME_MAP: printer(line) # Call the printer
+    for line in self.game_map: printer(line) # Call the printer
     if self.SYS_PLATFORM == "win": # Print number of moves if on Windows
-      print("\n[*] Moves: {moves}".format(moves=self.MOVE_NUM))
+      print("\n[*] Moves: {moves}".format(moves=self.move_num))
     else: # Add number of moves if using curses and reset to origin
-      self.STDSCR.addstr("\n[*] Moves: {moves}".format(moves=self.MOVE_NUM))
+      self.STDSCR.addstr("\n[*] Moves: {moves}".format(moves=self.move_num))
       self.STDSCR.move(0, 0)
 
   def checkWin(self):
     '''Checks if there are any spaces remaining.'''
-    return self.SPCS_REM == 0 # Return True if no spaces left
+    return self.spcs_rem == 0 # Return True if no spaces left
 
   def movePlayer(self, direction):
     '''Moves the player a specified direction.'''
     def collision_detect():
       '''Detects if collision occurs (boundary next character in sequence).'''
       if direction == 'u':
-        next_char_type = self.GAME_MAP[self.CURR_POS[0] - 1][self.CURR_POS[1]]
+        next_char_type = self.game_map[self.curr_pos[0] - 1][self.curr_pos[1]]
       if direction == 'd':
-        next_char_type = self.GAME_MAP[self.CURR_POS[0] + 1][self.CURR_POS[1]]
+        next_char_type = self.game_map[self.curr_pos[0] + 1][self.curr_pos[1]]
       if direction == 'l':
-        next_char_type = self.GAME_MAP[self.CURR_POS[0]][self.CURR_POS[1] - 1]
+        next_char_type = self.game_map[self.curr_pos[0]][self.curr_pos[1] - 1]
       if direction == 'r':
-        next_char_type = self.GAME_MAP[self.CURR_POS[0]][self.CURR_POS[1] + 1]
+        next_char_type = self.game_map[self.curr_pos[0]][self.curr_pos[1] + 1]
       if next_char_type == self.MAP_BOUNDRS:
         return True
       else:
@@ -147,40 +147,40 @@ class Game:
     def update_map():
       '''Updates the game map and number of spaces remaining.'''
       # Update current player space
-      self.GAME_MAP[self.CURR_POS[0]][self.CURR_POS[1]] = self.PLAYER_CHAR
+      self.game_map[self.curr_pos[0]][self.curr_pos[1]] = self.PLAYER_CHAR
       # Update previous taken spaces
       if direction == 'u':
-        self.GAME_MAP[self.CURR_POS[0]-1][self.CURR_POS[1]] = self.USED_SPACES
+        self.game_map[self.curr_pos[0]-1][self.curr_pos[1]] = self.USED_SPACES
       if direction == 'd':
-        self.GAME_MAP[self.CURR_POS[0]+1][self.CURR_POS[1]] = self.USED_SPACES
+        self.game_map[self.curr_pos[0]+1][self.curr_pos[1]] = self.USED_SPACES
       if direction == 'l':
-        self.GAME_MAP[self.CURR_POS[0]][self.CURR_POS[1]-1] = self.USED_SPACES
+        self.game_map[self.curr_pos[0]][self.curr_pos[1]-1] = self.USED_SPACES
       if direction == 'r':
-        self.GAME_MAP[self.CURR_POS[0]][self.CURR_POS[1]+1] = self.USED_SPACES
+        self.game_map[self.curr_pos[0]][self.curr_pos[1]+1] = self.USED_SPACES
       time.sleep(self.PLAYERSPEED)
       self.printMap()
-      self.SPCS_REM = 0 # Reset spaces remaining for recount
-      for y in range(0, len(self.GAME_MAP)):
-        for x in range(0, len(self.GAME_MAP)):
+      self.spcs_rem = 0 # Reset spaces remaining for recount
+      for y in range(0, len(self.game_map)):
+        for x in range(0, len(self.game_map)):
           # Recount the number of spaces remaining
-          if self.GAME_MAP[y][x] == self.UNUSED_SPCE: self.SPCS_REM += 1
-    self.MOVE_NUM += 1 # Add another move to counter
+          if self.game_map[y][x] == self.UNUSED_SPCE: self.spcs_rem += 1
+    self.move_num += 1 # Add another move to counter
     if direction == 'u':
       while not collision_detect():
         update_map()
-        self.CURR_POS = (self.CURR_POS[0] - 1, self.CURR_POS[1])
+        self.curr_pos = (self.curr_pos[0] - 1, self.curr_pos[1])
     if direction == 'd':
       while not collision_detect():
         update_map()
-        self.CURR_POS = (self.CURR_POS[0] + 1, self.CURR_POS[1])
+        self.curr_pos = (self.curr_pos[0] + 1, self.curr_pos[1])
     if direction == 'l':
       while not collision_detect():
         update_map()
-        self.CURR_POS = (self.CURR_POS[0], self.CURR_POS[1] - 1)
+        self.curr_pos = (self.curr_pos[0], self.curr_pos[1] - 1)
     if direction == 'r':
       while not collision_detect():
         update_map()
-        self.CURR_POS = (self.CURR_POS[0], self.CURR_POS[1] + 1)
+        self.curr_pos = (self.curr_pos[0], self.curr_pos[1] + 1)
     self.printMap()
 
   def gameloop(self, playerspeed=0.015):
@@ -192,10 +192,10 @@ class Game:
       if self.SYS_PLATFORM == "win":
         if msvcrt.kbhit(): # If key is pressed
           key = ord(msvcrt.getch()) # Get the key
-          if key == 119: game.movePlayer('u') # W
-          if key == 97: game.movePlayer('l')  # A
-          if key == 115: game.movePlayer('d') # S
-          if key == 100: game.movePlayer('r') # D
+          if key == 119: self.movePlayer('u') # W
+          if key == 97: self.movePlayer('l')  # A
+          if key == 115: self.movePlayer('d') # S
+          if key == 100: self.movePlayer('r') # D
           if key == 113 or key == 27: break
       else:
         key = self.STDSCR.getch() # Call getch and get -1 if no key pressed
@@ -216,7 +216,7 @@ if "win" in sys_platform:
   def start():
     '''Starts the game. Windows version.'''
     infile = open("demo_map.txt", 'r') # File containing the map to be used
-    game = Game(infile, sys_platform, (8, 8)) # Initialize game's components
+    game = Game(infile, sys_platform, start_position=(8, 8)) # Initialize game's components
     game.gameloop()
 else:
   def start(stdscr):
@@ -232,7 +232,7 @@ else:
 if __name__ == "__main__":
   # Run start method depending on platform
   if "win" in sys_platform: # Windows
-    import mscvrt # Used for getting keypresses in Windows
+    import msvcrt # Used for getting keypresses in Windows
     start() # Start the game
   else: # *nix
     import curses # Used for getting keypresses

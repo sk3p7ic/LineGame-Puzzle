@@ -1,4 +1,4 @@
-# LineGame Puzzle Version 1.1.0
+# LineGame Puzzle Version 1.1.1
 
 ![Demo of the game.](media/game_demo.gif "Game Demo")
 
@@ -48,6 +48,11 @@ Check out [my website](https://www.joshuaibrom.com),
 
 * Added Linux Support.
 * Added colors to Linux.
+
+**Version 1.1.1**
+
+* Fixed Windows issue where start_position was not set.
+* Fixed variable names to be more compliant (non-contants are now lowercase).
 
 ## ToDo
 ---
